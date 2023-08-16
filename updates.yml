@@ -1,10 +1,8 @@
----
-- name: Install all security, critical, and rollup updates without a scheduled task
-hosts: win
+ name: Install all security, critical, and rollup updates without a scheduled task
+
+  hosts: win
   tasks:
   - name: SecurityUpdates
     win_updates:
-      state: downloaded 
+      state: searched
       log_path: C:\ansible_wu.txt
-      register: result
-      - debug: var=result
