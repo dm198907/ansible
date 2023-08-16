@@ -1,6 +1,6 @@
 ---
 - name: Windows Update Playbook
-  hosts: all
+  hosts: win
   gather_facts: false
   tasks:
     - name: Apply update programs
