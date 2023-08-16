@@ -1,8 +1,6 @@
 ---
 - name: Install all security, critical, and rollup updates without a scheduled task
-
-  hosts: win
-  gather_facts: false
+hosts: win
   tasks:
   - name: SecurityUpdates
     win_updates:
