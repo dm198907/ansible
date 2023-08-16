@@ -3,6 +3,7 @@
   hosts: win
   tasks:
   - name: SecurityUpdates
+  category_names: SecurityUpdate
     win_updates:
       state: searched
       log_path: C:\ansible_wu.txt
