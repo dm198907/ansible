@@ -9,8 +9,7 @@
           - CriticalUpdates
           - SecurityUpdates
           - Updates
-        server_selection: managed_server
-        state: searched
+      state: searched
       register: result
 
     - debug: var=result
