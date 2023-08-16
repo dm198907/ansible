@@ -9,7 +9,7 @@
           - CriticalUpdates
           - SecurityUpdates
           - Updates
-      state: searched
+      state: downloaded
       register: result
 
     - debug: var=result
