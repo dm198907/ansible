@@ -10,6 +10,7 @@
           - SecurityUpdates
           - Updates
       state: downloaded
+      server_selection: default 
       register: result
 
     - debug: var=result
