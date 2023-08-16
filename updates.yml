@@ -1,11 +1,16 @@
 ---
-- name: Install all security, critical, and rollup updates without a scheduled task
-
-  hosts: win
+- name: Windows Update Playbook
+  hosts: all
+  gather_facts: false
   tasks:
-  - name: SecurityUpdates
-    win_updates:
-      state: downloaded
-      log_path: C:\ansible_wu.txt
+    - name: Apply update programs
+      win_updates:
+        category_names:
+          - CriticalUpdates
+          - SecurityUpdates
+          - Updates
+        server_selection: managed_server
+        state: searched
       register: result
-      - debug: var=result
+
+    - debug: var=result
