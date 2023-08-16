@@ -9,8 +9,8 @@
           - CriticalUpdates
           - SecurityUpdates
           - Updates
-      state: downloaded
-      server_selection: default 
+        server_selection: managed_server
+        state: installed
       register: result
 
     - debug: var=result
