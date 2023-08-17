@@ -2,9 +2,7 @@
 - name: Install WebPackage
   hosts: all
   become: yes
-  tasks: install {{ web_service}} & {{ Web_Package}}
+  tasks: install nginx
   yum:
-   name: 
-    - "{{ Web_Package }}"
-    - "{{ firewall_package }}"
+   name: nginx
   state: latest
