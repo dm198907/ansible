@@ -14,3 +14,24 @@
       when: ansible_os_family == "RedHat"
       register: result
       -debug: var=result
+       # Debian Family upgrade
+    - name: Update repositories cache
+      apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+    - name: Update all packages to their latest version
+      apt:
+        name: "*"
+        state: latest
+      when: ansible_os_family == "Debian"
+    - name: Upgrade the OS (apt-get dist-upgrade)
+      apt:
+        upgrade: dist
+      when: ansible_os_family == "Debian"
+
+    # Reboot after upgrade
+    - name: Reboot host
+      reboot:
+        connect_timeout: "{{ reboot_connect_timeout }}"
+        post_reboot_delay: "{{ reboot_post_reboot_delay }}"
+        reboot_timeout: "{{ reboot_timeout }}"
