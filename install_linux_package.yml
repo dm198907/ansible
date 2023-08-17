@@ -1,16 +1,8 @@
----
--name: Install WebPackag
-hosts: Linux
-become: yes
- tasks: Install application
--name: Install {{Web_Package}} & {{firewall_package}}
-yum:
-name:
-- "{{Web_Package}}"
-- "{{firewall_package}}"
-state: latest
-- name: Enable and start {{web_service}}
-service:
-name: {{web_service}}
-enabled: true
-state: started
+- name: Install WebPackag
+  hosts: all
+  become: yes
+  tasks: install web_service & Web_Package
+  yum:
+  - {{Web_Package}}
+  - {{firewall_package}}
+  state: latest
