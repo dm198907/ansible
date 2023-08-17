@@ -12,7 +12,5 @@
         name: '*'
         state: latest
       when: ansible_os_family == "RedHat"
-       register: result
-
-    - debug: var=result
-   
+      register: result
+      -debug: var=result
