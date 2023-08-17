@@ -1,6 +1,6 @@
 ---
 - name: Upgrade and Reboot RHEL & Debian family Linux distros
-  hosts: '{{inventory}}'
+  hosts: all
   vars:
     reboot_connect_timeout: 5
     reboot_post_reboot_delay: 15
