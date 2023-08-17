@@ -4,6 +4,7 @@
   become: yes
   tasks: install {{ web_service}} & {{ Web_Package}}
   yum:
-  - "{{ Web_Package }}"
-  - "{{ firewall_package }}"
+   name: 
+    - "{{ Web_Package }}"
+    - "{{ firewall_package }}"
   state: latest
