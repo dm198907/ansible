@@ -8,6 +8,7 @@
       yum:
         name: '*'
         state: latest
+        skip_broken: true
       when: ansible_os_family == "RedHat"
     # Debian Family upgrade
     - name: Update repositories cache
