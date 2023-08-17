@@ -1,5 +1,4 @@
 - hosts: all
-  user: ansible
   become: True
   tasks:
     - name: Install httpd package
