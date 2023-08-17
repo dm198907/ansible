@@ -3,7 +3,7 @@
   become: True
   tasks:
     - name: Install httpd package
-      dnf:
+      yum:
         name: httpd
         state: present
         update_cache: True
