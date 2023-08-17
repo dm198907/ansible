@@ -9,9 +9,7 @@
         name: '*'
         state: latest
       when: ansible_os_family == "RedHat"
-      register: result
-      -debug: var=result
-       # Debian Family upgrade
+    # Debian Family upgrade
     - name: Update repositories cache
       apt:
         update_cache: yes
