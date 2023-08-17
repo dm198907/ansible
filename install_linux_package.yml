@@ -1,17 +1,9 @@
 ---
-- name: Install WebPackag
+- name: Install WebPackage
   hosts: all
   become: yes
-  tasks: install web_service & Web_Package
+  tasks: install {{ web_service}} & {{ Web_Package}}
   yum:
-  - "{{Web_Package}}"
-  - "{{firewall_package}}"
+  - "{{ Web_Package }}"
+  - "{{ firewall_package }}"
   state: latest
-- name: web_service
-  enabled: true
-  state: started
-- name: firewall_service
-  service::
-  name: "{{firewall_service}}"
-  enabled: true
-  state: started    
