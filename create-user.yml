@@ -6,7 +6,7 @@
     - name: Add User
       win_user:
         name: Administrator
-        password: "@ns1bl3"
+        password: "Thankgod@123"
         state: present
         groups:
         - administrators
