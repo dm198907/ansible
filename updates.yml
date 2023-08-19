@@ -1,7 +1,7 @@
 ---
 - name: Windows Update Playbook
   hosts: all
-  gather_facts: false
+  gather_facts: true
   tasks:
     - name: Apply update programs
       win_updates:
@@ -10,7 +10,7 @@
           - SecurityUpdates
           - Updates
         server_selection: default
-        state: downloaded
+        state: "{{Update_State}}"
       register: result
 
     - debug: var=result
