@@ -1,0 +1,13 @@
+---
+- name: Windows Service Playbook
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: service start
+      win_service: 
+        name: "{{servicename}}"
+        state: "{{Service_state}}"  
+        start-mode: disabled
+      register: result
+
+    - debug: var=result
