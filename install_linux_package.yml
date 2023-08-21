@@ -1,7 +1,12 @@
-- hosts: all
-  become: True
-  tasks:
-    - name: Install httpd package
+---
+-  hosts: all
+   tasks:
+    - name: Install required packages
       yum:
-        name: "{{Package_Name}}"
-        state: latest
+       name: "{{Package_Name}}"
+       state: present
+       update_cache: True
+      register: yum_output
+    - debug:
+        msg: "{{ yum_output }}"
+
