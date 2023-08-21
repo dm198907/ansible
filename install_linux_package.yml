@@ -5,6 +5,5 @@
       yum:
         name: "{{Package_Name}}"
         state: latest
-        update_cache: True
-     register: result
+    register: result
      - debug: var=result
