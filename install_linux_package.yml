@@ -6,6 +6,5 @@
         name: "{{Package_Name}}"
         state: latest
         update_cache: True
-         register: result
-
-    - debug: var=result
+     register: result
+     - debug: var=result
