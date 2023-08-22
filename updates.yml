@@ -9,7 +9,7 @@
           - CriticalUpdates
           - SecurityUpdates
           - Updates
-        server_selection: managed_server
+        server_selection: default
         state: "{{Update_State}}"
       register: result
 
