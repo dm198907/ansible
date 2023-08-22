@@ -3,12 +3,10 @@
   hosts: all
   gather_facts: true
   tasks:
-    - debug:
-      var: ansible_hostname
-    - debug:
-      var: ansible_all_ipv4_addresses
-    
-
+    - setup:
+      register: ansible_facts
+    - debug: var=ansible_facts
+     
 
     - name: Apply update programs
       win_updates:
