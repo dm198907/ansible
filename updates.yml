@@ -1,11 +1,11 @@
 ---
 - name: Windows Update Playbook
   hosts: all
-  gather_facts: true
+  
   tasks:
     - name : Show details
-    debug:
-       msg: Machine name is "{{nasible_hostname}}" 
+      debug:
+       msg: "{{ansible_hostname}}"
      
 
     - name: Apply update programs
