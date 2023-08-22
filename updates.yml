@@ -9,7 +9,7 @@
           - CriticalUpdates
           - SecurityUpdates
           - Updates
-        server_selection: default
+        server_selection: windows_update
         state: "{{Update_State}}"
       register: result
 
