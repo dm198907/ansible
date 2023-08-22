@@ -6,6 +6,7 @@
     - name : Show details
       debug:
         msg: machine name is "{{ansible_hostname}}" 
+      debug:
         msg: OS Product type is "{{ansible_os_product_type}}"
      
 
