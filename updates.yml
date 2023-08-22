@@ -3,10 +3,11 @@
   hosts: all
   gather_facts: true
   tasks:
-    - setup:
-      register: ansible_facts
-    - debug: var=ansible_facts
-     
+    - debug:
+       msg:
+       - " Data type of 'ansible_architecture'  is {{ ansible_architecture | type_debug }} "
+       - " Data type of 'ansible_all_ipv4_addresses' is {{ ansible_all_ipv4_addresses | type_debug }} "
+      
 
     - name: Apply update programs
       win_updates:
