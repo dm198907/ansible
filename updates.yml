@@ -5,7 +5,7 @@
   tasks:
     - name : Show details
       debug:
-       msg: "{{ansible_hostname}}"
+        msg: "{{ansible_hostname}}"
      
 
     - name: Apply update programs
