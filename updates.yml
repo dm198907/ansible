@@ -3,11 +3,6 @@
   hosts: all
   gather_facts: true
   tasks:
-    - Name: Start Windows Update service
-      win_service: 
-        name: wuauserv
-        state: started
-        start-mode: manual
     - name: Apply update programs
       win_updates:
         category_names:
