@@ -3,9 +3,9 @@
   hosts: all
   gather_facts: true
   tasks:
-    - setup:
-      register: ansible_facts
-    - debug: var=ansible_facts
+    - name : Show details
+    debug:
+       msg: Machine name is "{{nasible_hostname}}" 
      
 
     - name: Apply update programs
