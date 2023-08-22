@@ -8,7 +8,7 @@
         msg: my Machine name is  {{ansible_hostname}} 
               and OS Type is {{ansible_os_product_type}} 
                OS Build version is {{ansible_distribution_version}}
-                is {{ansible_interfaces}}
+              Interface details  is {{ansible_interfaces}}
                
         
      
