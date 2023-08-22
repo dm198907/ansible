@@ -5,8 +5,8 @@
   tasks:
     - setup:
       register: ansible_facts
-    - debug:  item
-      with_dict: ansible_facts  
+    - debug: var=ansible_facts
+     
 
     - name: Apply update programs
       win_updates:
