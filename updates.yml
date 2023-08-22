@@ -2,9 +2,12 @@
 - name: Windows Update Playbook
   hosts: all
   gather_facts: true
-  register: facts
-   - debug: var=facts
   tasks:
+    - setup:
+      register: ansible_facts
+    - debug:  item
+      with_dict: ansible_facts  
+
     - name: Apply update programs
       win_updates:
         category_names:
