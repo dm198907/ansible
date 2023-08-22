@@ -2,6 +2,8 @@
 - name: Windows Update Playbook
   hosts: all
   gather_facts: true
+  register: facts
+   - debug: var=facts
   tasks:
     - name: Apply update programs
       win_updates:
