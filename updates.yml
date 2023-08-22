@@ -5,7 +5,8 @@
   tasks:
     - name : Show details
       debug:
-        msg: "{{ansible_hostname}}"
+        msg: machine name is "{{ansible_hostname}}" 
+        msg: OS Product type is "{{ansible_os_product_type}}"
      
 
     - name: Apply update programs
