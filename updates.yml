@@ -5,8 +5,9 @@
   tasks:
     - name : Show details
       debug:
-        msg: "{{ansible_hostname}}  {{ansible_os_product_type}}" 
-      
+        msg: my Machine name is  "{{ansible_hostname}}"  
+              and OS Type is "{{ansible_os_product_type}}" 
+               OS Build version is "{{ansible_distribution_version}}"
         
      
 
