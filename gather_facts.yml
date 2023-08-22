@@ -1,0 +1,10 @@
+---
+- hosts: all
+  gather_facts: true
+  tasks:
+  - debug:
+      var: ansible_hostname
+  - debug:
+      var: ansible_all_ipv4_addresses
+  - debug:
+      var: ansible_distribution
