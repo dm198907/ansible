@@ -4,9 +4,10 @@
   gather_facts: true
   tasks:
     - debug:
-      var: ansible_facts["memory_mb"]|type_debug
-    - debug: 
-        var: ansible_facts["machine"]|type_debug
+      var: ansible_hostname
+    - debug:
+      var: ansible_all_ipv4_addresses
+    
 
 
     - name: Apply update programs
