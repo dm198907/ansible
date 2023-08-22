@@ -8,7 +8,7 @@
         msg: my Machine name is  {{ansible_hostname}} 
               and OS Type is {{ansible_os_product_type}} 
                OS Build version is {{ansible_distribution_version}}
-               IPV4 address is {{ansible_facts.default.ipv4.address}}
+               IPV4 address is {{ansible_facts.default_ipv4.address}}
                
         
      
