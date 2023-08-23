@@ -13,7 +13,19 @@
         
      
 
-    - name: Apply update programs
+    - name: Search win updates
+      win_updates:
+        category_names:
+          - CriticalUpdates
+          - SecurityUpdates
+          - Updates
+        server_selection: managed_server
+        state: searched
+      register: searched_update
+
+    - debug: var=searched_update
+
+     - name: Apply update programs
       win_updates:
         category_names:
           - CriticalUpdates
