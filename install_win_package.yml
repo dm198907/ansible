@@ -10,6 +10,6 @@
        remote_src: True
        become: yes
   vars:
-    ansible_become_user: XXX\Uxxxxxx
-    ansible_become_pass: PasswordHere
+    ansible_become_user: administrator
+    ansible_become_pass: Thankgod@123
 
