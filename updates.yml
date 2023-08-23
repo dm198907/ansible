@@ -18,4 +18,5 @@
         server_selection: managed_server
         state: "{{Update_State}}"
       register: result
-      - debug: var=result
+    
+    - debug: var=result
