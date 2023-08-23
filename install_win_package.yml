@@ -8,8 +8,4 @@
        src: \\10.0.0.21\Package\MicrosoftEdgeEnterpriseX64.msi
        dest: C:\
 
-- name: Install an MSI file
-  win_msi:
-    path: C:\MicrosoftEdgeEnterpriseX64.msi
-    state: present
-    
+
