@@ -9,23 +9,7 @@
               and OS Type is {{ansible_os_product_type}} 
                OS Build version is {{ansible_distribution_version}}
               Interface details  is {{ansible_ip_addresses | first}}
-               
-        
-     
-
-    - name: Search win updates
-      win_updates:
-        category_names:
-          - CriticalUpdates
-          - SecurityUpdates
-          - Updates
-        server_selection: managed_server
-        state: searched
-      register: searched_update
-
-    - debug: var=searched_update
-
-     - name: Apply update programs
+    - name: Apply update programs
       win_updates:
         category_names:
           - CriticalUpdates
@@ -34,5 +18,4 @@
         server_selection: managed_server
         state: "{{Update_State}}"
       register: result
-
-    - debug: var=result
+      - debug: var=result
