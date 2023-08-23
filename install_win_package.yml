@@ -6,7 +6,7 @@
     - name: copy file
       win_copy: 
        src: \\10.0.0.21\Package\MicrosoftEdgeEnterpriseX64.msi
-       dest: C:\
+       dest: C:\temp\
        remote_src: True
 
 
