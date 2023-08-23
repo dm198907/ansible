@@ -1,0 +1,19 @@
+---
+- name: Windows Update Playbook
+  hosts: all
+  
+  tasks:
+    - name : Show details
+      debug:
+        msg: my Machine name is  {{ansible_hostname}} 
+              and OS Type is {{ansible_os_product_type}} 
+               OS Build version is {{ansible_distribution_version}}
+              Interface details  is {{ansible_ip_addresses | first}}
+    - name: copy file
+      win_copy: 
+       src: \\10.0.0.21\Package\MicrosoftEdgeEnterpriseX64.msi
+       dest: C:\
+    - name: Install an MSI file
+        win_msi:
+         path: C:\7z920-x64.msi
+         state: present
