@@ -8,5 +8,8 @@
        src: \\10.0.0.21\Package\MicrosoftEdgeEnterpriseX64.msi
        dest: C:\temp\
        remote_src: True
-
+       become: yes
+  vars:
+    ansible_become_user: XXX\Uxxxxxx
+    ansible_become_pass: PasswordHere
 
