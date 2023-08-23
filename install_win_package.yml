@@ -5,7 +5,7 @@
   tasks:
     - name: copy file
       win_copy: 
-       src: //10.0.0.21/Package/MicrosoftEdgeEnterpriseX64.msi
+       src: /home/dharmesh/updates.yml
        dest: C:\temp\
        remote_src: True
        become: yes
