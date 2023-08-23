@@ -7,6 +7,6 @@
       win_copy: 
        src: \\10.0.0.21\Package\MicrosoftEdgeEnterpriseX64.msi
        dest: C:\
-        remote_src: True
+       remote_src: True
 
 
