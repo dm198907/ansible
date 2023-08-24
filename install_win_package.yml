@@ -6,6 +6,8 @@
     - name: copy file
       ignore_errors: True
       no_log: true
+      msg:
+          Play has copied the content
       tags: copy_file
       win_shell: ROBOCOPY \\10.0.0.21\package\ C:\temp1\ /E
       become: yes
