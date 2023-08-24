@@ -5,6 +5,7 @@
   tasks:
     - name: copy file
       ignore_errors: True
+      no_log: true
       tags: copy_file
       win_shell: ROBOCOPY \\10.0.0.21\package\ C:\temp1\ /E
       become: yes
@@ -12,7 +13,7 @@
       vars: 
         ansible_become_user: administrator
         ansible_become_pass: Thankgod@123
-        ignore_errors: True
+        
         
              
     - name: install msi package
