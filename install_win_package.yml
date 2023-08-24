@@ -1,15 +1,26 @@
 ---
 - name: Windows Update Playbook
-  hosts: all
+  hosts: win
   
   tasks:
     - name: copy file
-      win_copy: 
-       src: /home/dharmesh/updates.yml
-       dest: C:\temp\
-       remote_src: True
-       become: yes
-  vars:
-    ansible_become_user: administrator
-    ansible_become_pass: Thankgod@123
+      ignore_errors: True
+      tags: copy_file
+      win_shell: ROBOCOPY \\10.0.0.21\package\ C:\temp1\ /E
+      become: yes
+      become_method: runas 
+      vars: 
+        ansible_become_user: administrator
+        ansible_become_pass: Thankgod@123
+        ignore_errors: True
+        
+             
+    - name: install msi package
+      tags: install_package
+      win_package:
+            path: C:\temp1\"{{Package_Name}}"
+            state: present
+            log_path: C:\temp1\MSI.log
+            ignore_errors: true
+            
 
