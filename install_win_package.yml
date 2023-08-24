@@ -4,8 +4,6 @@
   
   tasks:
     - name: copy file
-    - debug: 
-        msg: This is the first line
       ignore_errors: True
       no_log: true
     
