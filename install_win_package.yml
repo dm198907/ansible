@@ -18,7 +18,7 @@
     - name: install msi package
       tags: install_package
       win_package:
-            path: C:\temp1\{{Package_Name}}
+            path: C:\temp1\{{Package_Name}}.msi
             state: present
             log_path: C:\temp1\MSI.log
             ignore_errors: true
