@@ -23,4 +23,6 @@
       win_package:
         path: C:\temp2\{{Package_Name}}.msi
         state: present
-        log_path: C:\temp2\msi.log
+      register: result
+    
+    - debug: var=result
