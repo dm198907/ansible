@@ -11,7 +11,7 @@
       win_robocopy:
        
        src: \\10.0.0.21\Package\{{Package_Name}}.msi
-       dest: C:\temp2
+       dest: C:\temp2\
        Flags: /E
       become: yes
       become_method: runas 
