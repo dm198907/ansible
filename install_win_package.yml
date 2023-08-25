@@ -1,12 +1,15 @@
 ---
 - name: Windows Update Playbook
-  hosts: all
+  hosts: win
   
   tasks:
     - name: copy file
       ignore_errors: True
       tags: copy_file
+      no_log: True    
+        
       win_robocopy:
+       
        src: \\10.0.0.21\Package\
        dest: C:\temp2
        Flags: /E /Log:C:\temp2\Robo.log
@@ -15,12 +18,4 @@
       vars: 
         ansible_become_user: administrator
         ansible_become_pass: Thankgod@123
-        ignore_errors: True  
-     
-    - name: Install MSI 
-      tags: install_package{{Package_Name}}
-      win_package:
-            path: C:\temp1\"{{Package_Name}}"
-            state: present
-            log_path: C:\temp1\MSI.log
-            ignore_errors: true   
+        ignore_errors: True
