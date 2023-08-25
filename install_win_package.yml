@@ -11,7 +11,7 @@
       win_robocopy:
        
        src: \\10.0.0.21\Package\{{Package_Name}}
-       dest: C:\temp2\{{Package_Name}}\{{Package_Name}}
+       dest: C:\temp2\{{Package_Name}}
        Flags: /v
       become: yes
       become_method: runas 
@@ -25,7 +25,7 @@
     
     - name: install_package
       win_package:
-        path: C:\temp2\{{Package_Name}}.msi
+        path: C:\temp2\{{Package_Name}}\{{Package_Name}}.msi
         state: present
       register: result
     
