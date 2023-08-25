@@ -12,7 +12,7 @@
        
        src: \\10.0.0.21\Package\{{Package_Name}}.msi
        dest: C:\temp2\{{Package_Name}}.msi
-       Flags: /E
+       Flags: /v
       become: yes
       become_method: runas 
       vars: 
