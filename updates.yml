@@ -1,31 +1,16 @@
 ---
 - name: Windows Update Playbook
   hosts: all
-  
+  gather_facts: false
   tasks:
-    - name: copy file
-      ignore_errors: True
-      tags: copy_file
-         
-        
-      win_robocopy:
-       
-       src: \\10.0.0.21\Package\
-       dest: C:\temp2
-       Flags: /E
-      become: yes
-      become_method: runas 
-      vars: 
-        ansible_become_user: administrator
-        ansible_become_pass: Thankgod@123
-        ignore_errors: True
-      register: result1
-    
-    - debug: var=result1
-    - name: install_package
-      win_package:
-        path: C:\temp2\{{Package_Name}}.msi
-        state: present
+    - name: Apply update programs
+      win_updates:
+        category_names:
+          - CriticalUpdates
+          - SecurityUpdates
+          - Updates
+        server_selection: default
+        state: "{{Update_State}}"
       register: result
-    
+
     - debug: var=result
