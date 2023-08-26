@@ -3,13 +3,6 @@
   hosts: all
   
   tasks:
-    - name : Show details
-    - debug:
-        msg: my Machine name is  {{ansible_hostname}} 
-            
-        
-     
-
     - name: Apply update programs
       win_updates:
         category_names:
