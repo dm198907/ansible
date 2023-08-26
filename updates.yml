@@ -3,24 +3,36 @@
   hosts: all
   
   tasks:
-    - name : Show details
+    - name: show details
       debug:
-        msg: my Machine name is  {{ansible_hostname}} 
+         msg: my Machine name is  {{ansible_hostname}}
               and OS Type is {{ansible_os_product_type}} 
                OS Build version is {{ansible_distribution_version}}
                IPV4 address is {{ansible_facts.default.ipv4.address}}
-               
+                
+    - name: copy file
+      ignore_errors: True
+      tags: copy_file
+         
         
-     
-
-    - name: Apply update programs
-      win_updates:
-        category_names:
-          - CriticalUpdates
-          - SecurityUpdates
-          - Updates
-        server_selection: managed_server
-        state: "{{Update_State}}"
+      win_robocopy:
+       
+       src: \\10.0.0.21\Package\{{Package_Name}}
+       dest: C:\temp2\
+       Flags: /E
+      become: yes
+      become_method: runas 
+      vars: 
+        ansible_become_user: administrator
+        ansible_become_pass: Thankgod@123
+        ignore_errors: True
+      register: result1
+    
+    - debug: var=result1
+    - name: install_package
+      win_package:
+        path: C:\temp2\{{Package_Name}}.msi
+        state: present
       register: result
-
+    
     - debug: var=result
