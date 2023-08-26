@@ -6,10 +6,7 @@
     - name: copy file
       ignore_errors: True
       tags: copy_file
-         
-        
       win_robocopy:
-       
        src: \\10.0.0.21\Package\{{Package_Name}}
        dest: C:\temp2\
        Flags: /E
