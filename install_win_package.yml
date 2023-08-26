@@ -4,8 +4,8 @@
   gather_facts: True
   tasks:
     - name: show details
-    - debug:
-         msg: my Machine name is  {{ansible_hostname}}
+      - debug:
+          msg: my Machine name is  {{ansible_hostname}}
               
     - name: copy file
       ignore_errors: True
