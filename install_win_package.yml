@@ -3,10 +3,20 @@
   hosts: all
   
   tasks:
+    - name: show details
+      debug:
+         msg: my Machine name is  {{ansible_hostname}}
+              and OS Type is {{ansible_os_product_type}} 
+               OS Build version is {{ansible_distribution_version}}
+               IPV4 address is {{ansible_facts.default.ipv4.address}}
+                
     - name: copy file
       ignore_errors: True
       tags: copy_file
+         
+        
       win_robocopy:
+       
        src: \\10.0.0.21\Package\{{Package_Name}}
        dest: C:\temp2\
        Flags: /E
