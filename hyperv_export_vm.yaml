@@ -16,7 +16,7 @@
     - name: Export the source VM
       win_shell: |
         $vmName = "SourceVM"  # Replace with your source VM name
-        $exportPath = "C:\\Hyper-V\\Exports\\$vmName"
+        $exportPath = "D:\\Hyper-V\\Exports\\$vmName"
         Export-VM -Name $vmName -Path $exportPath
 
     - name: Import the VM as a new VM
