@@ -1,0 +1,14 @@
+---
+- name: Ping, gather and display outdated Chocolatey packages
+  hosts: win  
+  gather_facts: false
+  tasks:
+    - name: Ping the Windows host
+      win_ping:
+
+    - name: Gather all facts from Chocolatey
+      win_chocolatey_facts:
+
+    - name: Display the outdated packages
+      debug:
+        var: ansible_chocolatey.outdated
