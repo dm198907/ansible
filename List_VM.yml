@@ -1,0 +1,11 @@
+----
+-- name: List all VMs on Hyper-V
+-  hosts: win
+-  tasks:
+-    - name: Get list of VMs
+-      win_shell: Get-VM | Select-Object -ExpandProperty Name
+-      register: vm_list
+-
+-    - name: Display VM names
+-      debug:
+-        var: vm_list.stdout_lines

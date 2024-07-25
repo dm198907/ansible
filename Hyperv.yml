@@ -1,0 +1,18 @@
+----
+-- name: Manage Hyper-V Server
+-  hosts: hyperv
+-  tasks:
+-    - name: Ensure Hyper-V Management Service is running
+-      win_service:
+-        name: vmms
+-        start_mode: auto
+-        state: started
+-
+-    - name: Create a new virtual machine
+-      win_shell: |
+-        New-VM -Name "TestVM" -MemoryStartupBytes 1GB -NewVHDPath "C:\VMs\TestVM\TestVM.vhdx" -NewVHDSizeBytes 50GB -Path "C:\VMs\TestVM"
+-      args:
+-        creates: C:\VMs\TestVM\TestVM.vhdx
+-
+-    - name: Start the new virtual machine
+-      win_shell: Start-VM -Name "TestVM"

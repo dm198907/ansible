@@ -1,0 +1,20 @@
+----
+-- name: Compress a folder and remove the original
+-  hosts: win  
+-  gather_facts: false
+-  vars:
+-    folder_to_compress: \\myhyperv\D:\Backup\"  # Replace with the actual path
+-    compressed_file: "{{ folder_to_compress }}.zip"
+-
+-  tasks:
+-    - name: Compress the folder
+-      win_shell: Compress-Archive -Path "{{ folder_to_compress }}" -DestinationPath "{{ compressed_file }}"
+-
+-    - name: Verify compressed file exists
+-      win_file:
+-        path: "{{ compressed_file }}"
+-        state: file
+-
+-    - name: Remove the original folder
+-      win_shell: Remove-Item "{{ folder_to_compress }}" -Recurse -Force
+-      when: result.stat.exists  # Only remove if compression was successful
