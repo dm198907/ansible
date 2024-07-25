@@ -1,0 +1,62 @@
+----
+
+-- name: Clone a Hyper-V VM
+
+-  hosts: hyperv
+
+-  tasks:
+
+-    - name: Ensure Hyper-V Management Service is running
+
+-      win_service:
+
+-        name: vmms
+
+-        start_mode: auto
+
+-        state: started
+
+-
+
+-    - name: Shut down the source VM
+
+-      win_shell: |
+
+-        $vmName = "SourceVM"  # Replace with your source VM name
+
+-        Stop-VM -Name $vmName -Force
+
+-
+
+-    - name: Export the source VM
+
+-      win_shell: |
+
+-        $vmName = "SourceVM"  # Replace with your source VM name
+
+-        $exportPath = "D:\\Hyper-V\\Exports\\$vmName"
+
+-        Export-VM -Name $vmName -Path $exportPath
+
+-
+
+-    - name: Import the VM as a new VM
+
+-      win_shell: |
+
+-        $importPath = "C:\\Hyper-V\\Exports\\SourceVM"  # Replace with your source VM export path
+
+-        $newVmName = "ClonedVM"  # Replace with your new VM name
+
+-        Import-VM -Path $importPath -Copy -GenerateNewId -Name $newVmName
+
+-
+
+-    - name: Start the new VM
+
+-      win_shell: |
+
+-        $vmName = "ClonedVM"  # Replace with your new VM name
+
+-        Start-VM -Name $vmName
+

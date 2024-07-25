@@ -1,0 +1,28 @@
+----
+-- name: Gather Disk Status
+-  hosts: all
+-  tasks:
+-    - name: Gather system facts
+-      setup:
+-
+-    - name: Filter and print disk information (Linux)
+-      debug:
+-        var: item
+-      with_items: "{{ ansible_mounts }}"
+-      when: ansible_os_family == "Debian" or ansible_os_family == "RedHat"
+-      loop_control:
+-        label: "{{ item.mount }}"
+-      ignore_errors: yes
+-      register: linux_disks
+-      tags: linux_disks
+-      when: item.mount not in ['/mnt', '/dev', '/run', '/sys', '/proc', '/boot', '/tmp', '/var']
+-
+-    - name: Get disk status (Windows)
+-      win_command: Get-PSDrive -PSProvider FileSystem | Select-Object Used,Free,Name
+-      register: win_disk_status
+-      when: ansible_os_family == "Windows"
+-
+-    - name: Print disk information (Windows)
+-      debug:
+-        var: win_disk_status.stdout_lines
+-      when: ansible_os_family == "Windows"
