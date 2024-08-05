@@ -1,20 +1,17 @@
-----
+- name: Gather Host Information
+  hosts: all
 
--- hosts: all
+  gather_facts: yes
 
--  gather_facts: true
+  tasks:
+    - name: Display hostname
+      debug:
+        msg: "Hostname: {{ ansible_hostname }}"
 
--  tasks:
+    - name: Display IP addresses
+      debug:
+        msg: "IP Addresses: {{ ansible_all_ipv4_addresses }}"
 
--  - debug:
-
--      var: ansible_hostname
-
--  - debug:
-
--      var: ansible_all_ipv4_addresses
-
--  - debug:
-
--      var: ansible_distribution
-\ No newline at end of file
+    - name: Display distribution
+      debug:
+        msg: "Distribution: {{ ansible_distribution }}"

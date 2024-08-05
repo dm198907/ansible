@@ -1,53 +1,18 @@
 ---
-- name: Gather Disk Usage Information
+- name: Gather Disk Partition Information
   hosts: all
+  become: yes
 
   tasks:
-    - name: Get Mounted Filesystems
-      ansible.builtin.mount:
-        path: "/"   
-        recurse: no   
-      register: mounted_filesystems
+    - name: Get partition information using lsblk
+      command: lsblk -o NAME,SIZE,TYPE,MOUNTPOINT --json
+      register: disk_info
 
-    - name: Get Network Mounts (SMB/CIFS)
-      ansible.builtin.mount:
-        fstype: cifs
-      register: network_mounts
+    - name: Convert JSON output to a structured list
+      set_fact:
+        disk_info_json: "{{ disk_info.stdout | from_json }}"
 
-    - name: Get Disk Usage Facts
-      ansible.builtin.df:
-        path: "{{ item.mount }}"
-      loop: "{{ mounted_filesystems.results + network_mounts.results }}"
-      register: df_results
-
-    - name: Display Disk Usage in Tree Format
-      ansible.builtin.debug:
-        msg: |
-          Disk Space Usage:
-          {{ build_disk_usage_tree(df_results.results) }}
-
-  vars:
-    def build_disk_usage_tree(results):
-      tree = ""
-      for result in results:
-        mount = result['mount']
-        filesystem = result['filesystem']
-        size_total = result['size_total']
-        used = result['used']
-        available = result['available']
-        usage_percent = result['used_percent']
-        if mount == '/':
-          tree += f"- / ({filesystem}, {size_total}, {usage_percent}% used)\n"
-        else:
-          tree += f"  └── {mount} ({filesystem}, {size_total}, {usage_percent}% used)\n"
-      return tree
-
-
-
-
-
-
-
-
-
-
+    - name: Display partition information in table format
+      template:
+        src: disk_info_table.j2
+        dest: /tmp/disk_info_table.txt
