@@ -1,13 +1,19 @@
 ---
-- name: Show Current Disk Space
+- name: Show Disk Usage with duf
   hosts: all
   become: yes
 
   tasks:
-    - name: Get disk space usage
-      command: df -h
-      register: disk_space
+    - name: Ensure duf is installed
+      apt:
+        name: duf
+        state: present
+      # Adjust this task if your system uses a different package manager or if you need to add a repository.
 
-    - name: Display disk space usage
+    - name: Get disk usage information with duf
+      command: duf
+      register: duf_output
+
+    - name: Display disk usage information
       ansible.builtin.debug:
-        msg: "{{ disk_space.stdout }}"
+        msg: "{{ duf_output.stdout }}"
