@@ -1,0 +1,36 @@
+---
+- name: Install Webmin on Debian
+  hosts: all
+  become: yes
+  tasks:
+    - name: Ensure the required dependencies are installed
+      apt:
+        name:
+          - software-properties-common
+          - apt-transport-https
+        state: present
+
+    - name: Add Webmin repository
+      apt_repository:
+        repo: deb http://download.webmin.com/download/repository sarge contrib
+        state: present
+
+    - name: Add Webmin GPG key
+      apt_key:
+        url: http://www.webmin.com/jcameron-key.asc
+        state: present
+
+    - name: Update package list
+      apt:
+        update_cache: yes
+
+    - name: Install Webmin
+      apt:
+        name: webmin
+        state: present
+
+    - name: Ensure Webmin service is running
+      service:
+        name: webmin
+        state: started
+        enabled: yes

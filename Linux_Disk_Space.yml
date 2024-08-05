@@ -1,26 +1,53 @@
-----
--- name: Show all disk free space in tree format
--  hosts: all
--  gather_facts: no
--  tasks:
--    - name: Get disk usage information
--      command: df -hT
--      register: disk_usage
--
--    - name: Print disk usage in tree format
--      shell: |
--        echo "{{ disk_usage.stdout }}" | awk '
--        BEGIN {
--          print "Disk Space Usage:"
--        }
--        NR==1 {
--          printf "%-20s %-10s %-10s %-10s %-10s %-10s %s\n", $1, $2, $3, $4, $5, $6, $7
--        }
--        NR>1 {
--          printf "|-- %-16s %-8s %-10s %-10s %-10s %-10s %s\n", $1, $2, $3, $4, $5, $6, $7
--        }'
--      register: tree_output
--
--    - name: Display the tree output
--      debug:
--        msg: "{{ tree_output.stdout }}"
+---
+- name: Gather Disk Usage Information
+  hosts: all
+
+  tasks:
+    - name: Get Mounted Filesystems
+      ansible.builtin.mount:
+        path: "/"   
+        recurse: no   
+      register: mounted_filesystems
+
+    - name: Get Network Mounts (SMB/CIFS)
+      ansible.builtin.mount:
+        fstype: cifs
+      register: network_mounts
+
+    - name: Get Disk Usage Facts
+      ansible.builtin.df:
+        path: "{{ item.mount }}"
+      loop: "{{ mounted_filesystems.results + network_mounts.results }}"
+      register: df_results
+
+    - name: Display Disk Usage in Tree Format
+      ansible.builtin.debug:
+        msg: |
+          Disk Space Usage:
+          {{ build_disk_usage_tree(df_results.results) }}
+
+  vars:
+    def build_disk_usage_tree(results):
+      tree = ""
+      for result in results:
+        mount = result['mount']
+        filesystem = result['filesystem']
+        size_total = result['size_total']
+        used = result['used']
+        available = result['available']
+        usage_percent = result['used_percent']
+        if mount == '/':
+          tree += f"- / ({filesystem}, {size_total}, {usage_percent}% used)\n"
+        else:
+          tree += f"  └── {mount} ({filesystem}, {size_total}, {usage_percent}% used)\n"
+      return tree
+
+
+
+
+
+
+
+
+
+
