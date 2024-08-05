@@ -1,18 +1,13 @@
 ---
-- name: Gather Disk Partition Information
+- name: Show Current Disk Space
   hosts: all
   become: yes
 
   tasks:
-    - name: Get partition information using lsblk
-      command: lsblk -o NAME,SIZE,TYPE,MOUNTPOINT --json
-      register: disk_info
+    - name: Get disk space usage
+      command: df -h
+      register: disk_space
 
-    - name: Convert JSON output to a structured list
-      set_fact:
-        disk_info_json: "{{ disk_info.stdout | from_json }}"
-
-    - name: Display partition information in table format
-      template:
-        src: disk_info_table.j2
-        dest: /tmp/disk_info_table.txt
+    - name: Display disk space usage
+      ansible.builtin.debug:
+        msg: "{{ disk_space.stdout }}"
