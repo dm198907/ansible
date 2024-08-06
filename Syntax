@@ -1,0 +1,18 @@
+- name: Playbook Name
+  hosts: target_group
+  gather_facts: yes
+  tasks:
+    - name: Task Name 1
+      module_name:
+        option1: value1
+        option2: value2
+
+    - name: Task Name 2
+      module_name:
+        option1: value1
+        option2: value2
+
+    - name: Task Name 3
+      module_name:
+        option1: value1
+        option2: value2

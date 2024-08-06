@@ -1,32 +1,13 @@
-----
-
--- name: Windows Update Playbook
-
--  hosts: all
-
--  
-
--  tasks:
-
--    - name: Apply update programs
-
--      win_updates:
-
--        category_names:
-
--          - CriticalUpdates
-
--          - SecurityUpdates
-
--          - Updates
-
--        server_selection: managed_server
-
--        state: "{{Update_State}}"
-
--      register: result
-
--
-
--    - debug: var=result
-
+- name: Windows Update Playbook
+  hosts: all
+  tasks:
+    - name: Apply update programs
+      ansible.windows.win_updates:
+        category_names:
+          - SecurityUpdates
+          - CriticalUpdates
+          - UpdateRollups
+        server_selection: "windows_update"
+        skip_optional: True
+        state: installed
+        reboot: true

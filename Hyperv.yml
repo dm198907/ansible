@@ -1,18 +1,23 @@
-----
--- name: Manage Hyper-V Server
--  hosts: hyperv
--  tasks:
--    - name: Ensure Hyper-V Management Service is running
--      win_service:
--        name: vmms
--        start_mode: auto
--        state: started
--
--    - name: Create a new virtual machine
--      win_shell: |
--        New-VM -Name "TestVM" -MemoryStartupBytes 1GB -NewVHDPath "C:\VMs\TestVM\TestVM.vhdx" -NewVHDSizeBytes 50GB -Path "C:\VMs\TestVM"
--      args:
--        creates: C:\VMs\TestVM\TestVM.vhdx
--
--    - name: Start the new virtual machine
--      win_shell: Start-VM -Name "TestVM"
+---
+- name: Playbook Name
+  hosts: win
+  gather_facts: true
+  tasks:
+    - name :  Find all services that start with 'win'
+      ansible.windows.win_service :
+          name : VMMS
+          start_mode: auto
+          state : started
+      register : service_info
+    - name : debug
+      debug : 
+        msg : "Service Name: {{ service_info.display_name }}, State: {{ service_info.state }}, Start Mode: {{ service_info.start_mode }}"
+
+    - name: Get hostname
+      win_shell: |
+        hostname
+      register: machine_info
+
+    - name: Debug hostname information
+      debug:
+        var: machine_info
