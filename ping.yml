@@ -1,5 +1,5 @@
 - name: Test connectivity to Windows hosts
-  hosts: win
+  hosts: all
   gather_facts: false
   tasks:
     - name: Ping Windows hosts
