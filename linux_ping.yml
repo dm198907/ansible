@@ -1,0 +1,11 @@
+---
+- name: Ping Test
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Ping hosts
+      ansible.builtin.ping:
+
+    - name: Print host information
+      ansible.builtin.debug:
+        msg: "Successfully connected to {{ inventory_hostname }} ({{ ansible_host }})"
