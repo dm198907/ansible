@@ -1,6 +1,6 @@
 ---
 - name: Retrieve and display disk size on Windows
-  hosts: windows
+  hosts: all
   gather_facts: no
   tasks:
     - name: Gather disk facts
