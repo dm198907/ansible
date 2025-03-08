@@ -1,16 +1,68 @@
 ---
-
 - name: Upgrade and Reboot RHEL & Debian family Linux distros
-
   hosts: all
+  become: yes
   tasks:
-   - name : Update Debian OS 
-     apt : 
-      update_cache: yes
-      state: latest
-     when: ansible_os_family == "Debian"
-     register: update
-     ignore_errors: yes
-   - name: debug
-     debug: 
-       var: update  
+
+    - name: Gather OS Family
+      setup:
+        filter: ansible_os_family
+
+    - name: Check available updates on Debian-based OS
+      command: apt list --upgradable
+      when: ansible_os_family == "Debian"
+      register: debian_updates
+      changed_when: false
+      failed_when: false
+
+    - name: Check available updates on RHEL-based OS
+      command: dnf check-update || yum check-update
+      when: ansible_os_family == "RedHat"
+      register: rhel_updates
+      changed_when: false
+      failed_when: false
+
+    - name: Display available updates for Debian-based OS
+      debug:
+        msg: "{{ debian_updates.stdout_lines }}"
+      when: debian_updates.stdout_lines is defined and debian_updates.stdout_lines | length > 0
+
+    - name: Display available updates for RHEL-based OS
+      debug:
+        msg: "{{ rhel_updates.stdout_lines }}"
+      when: rhel_updates.stdout_lines is defined and rhel_updates.stdout_lines | length > 0
+
+    - name: Update Debian-based OS
+      apt:
+        update_cache: yes
+        upgrade: dist
+        cache_valid_time: 3600
+      when: ansible_os_family == "Debian"
+      register: debian_update
+      failed_when: false
+
+    - name: Update RHEL-based OS
+      package:
+        name: "*"
+        state: latest
+      when: ansible_os_family == "RedHat"
+      register: rhel_update
+      failed_when: false
+
+    - name: Check if a reboot is required (Debian-based)
+      stat:
+        path: /var/run/reboot-required
+      register: reboot_required
+      when: ansible_os_family == "Debian"
+
+    - name: Reboot the server if required (Debian-based)
+      reboot:
+      when: ansible_os_family == "Debian" and reboot_required.stat.exists
+
+    - name: Reboot the server if required (RHEL-based)
+      reboot:
+      when: ansible_os_family == "RedHat" and "'No updates available' not in rhel_update.stdout"
+
+    - name: Debug update results
+      debug:
+        msg: "{{ debian_update | default(rhel_update) }}"
