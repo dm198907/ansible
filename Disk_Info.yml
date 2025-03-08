@@ -1,8 +1,14 @@
 - name: Gather and Output Disk Facts
   hosts: all
+  gather_facts: no  # Avoids default fact gathering
   tasks:
     - name: Get disk facts
-      win_disk_facts:
+      ansible.windows.win_disk_facts:
+
+    - name: Ensure disks data is available
+      fail:
+        msg: "No disk facts found!"
+      when: ansible_facts.disks | default([]) | length == 0
 
     - name: Output first disk size
       debug:
@@ -10,11 +16,8 @@
 
     - name: Convert first system disk into various formats
       debug:
-        msg: '{{ disksize_gib }} vs {{ disksize_gib_human }}'
+        msg: '{{ disksize_gib }} GiB vs {{ disksize_gib_human }}'
       vars:
-        # Get first system disk
-        disk: '{{ ansible_facts.disks|selectattr("system_disk")|first }}'
-        
-        # Show disk size in Gibibytes
-        disksize_gib_human: '{{ disk.size|filesizeformat(true) }}'
-        disksize_gib: '{{ (disk.size / 1024 | pow(3)) | round | int }} GiB'
+        disk: '{{ ansible_facts.disks | selectattr("system_disk", "defined") | selectattr("system_disk") | first | default({}) }}'
+        disksize_gib: '{{ (disk.size | default(0) / (1024**3)) | round(2) }}'
+        disksize_gib_human: '{{ disk.size | default(0) | human_readable }}'
