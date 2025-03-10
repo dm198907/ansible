@@ -5,13 +5,19 @@
   tasks:
     - name: Get detailed VM information
       win_shell: |
-        $vms = Get-VM | Select-Object Name, State, 
+        $vms = Get-VM | Select-Object Name, 
+            @{Name='StateValue'; Expression={$_.State}},
             @{Name='CPUUsage'; Expression={$_.CPUUsage}},
             @{Name='MemoryAssignedGB'; Expression={[math]::Round($_.MemoryAssigned / 1GB, 2)}},
             Status, 
             @{Name='UptimeString'; Expression={$_.Uptime.ToString()}}
         ConvertTo-Json -InputObject $vms -Depth 3
       register: vm_info
+      
+    - name: Debug raw output (first item only)
+      debug:
+        msg: "First VM raw data: {{ (vm_info.stdout | from_json)[0] | default({}) }}"
+      when: (vm_info.stdout | from_json) is sequence and (vm_info.stdout | from_json) | length > 0
 
     - name: Parse VM data
       set_fact:
@@ -25,19 +31,19 @@
       debug:
         msg: |
           🖥️  {{ item.Name | default('Unknown VM') }}
-          - State:       {% if item.State == 'Off' %}🔴 Stopped{% elif item.State == 'On' %}🟢 Running{% else %}{{ item.State | default('Unknown') }}{% endif %}
+          - State:       {% if item.StateValue == 2 %}🔴 Stopped{% elif item.StateValue == 3 %}🟢 Running{% else %}Unknown ({{ item.StateValue | default('Not available') }}){% endif %}
           - CPU Usage:   {{ item.CPUUsage | default(0) }}%
           - Memory:      {{ item.MemoryAssignedGB | default(0) }} GB
           - Status:      {{ item.Status | default('Unknown') }}
-          - Uptime:      {% if item.UptimeString is defined %}{{ item.UptimeString.split('.')[0] }}{% else %}N/A{% endif %}
+          - Uptime:      {% if item.UptimeString is defined and item.UptimeString %}{{ item.UptimeString.split('.')[0] }}{% else %}N/A{% endif %}
       loop: "{{ vm_array }}"
       loop_control:
         label: "{{ item.Name | default('Unknown VM') }}"
       
     - name: Count running and stopped VMs
       set_fact:
-        running_vms: "{{ vm_array | selectattr('State', 'equalto', 'On') | list }}"
-        stopped_vms: "{{ vm_array | selectattr('State', 'equalto', 'Off') | list }}"
+        running_vms: "{{ vm_array | selectattr('StateValue', 'equalto', 3) | list }}"
+        stopped_vms: "{{ vm_array | selectattr('StateValue', 'equalto', 2) | list }}"
       
     - name: Show VM summary
       debug:
