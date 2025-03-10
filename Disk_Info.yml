@@ -1,11 +1,14 @@
 ---
 - name: Retrieve and display disk size on Windows
-  hosts: all
+  hosts: windows
   gather_facts: no
   tasks:
-    - name: Gather disk facts
-      win_disk_facts:
+    - name: Get disk size using PowerShell
+      win_shell: |
+        $disks = Get-PhysicalDisk | Select-Object DeviceId, MediaType, Size | ConvertTo-Json -Depth 2
+        Write-Output $disks
+      register: disk_info
 
-    - name: Display disk information
+    - name: Display formatted disk information
       debug:
-        msg: "{{ ansible_facts['disks'] }}"
+        msg: "{{ disk_info.stdout | from_json }}"
