@@ -1,17 +1,25 @@
-- name: Retrieve and display disk size on Windows
+- name: Retrieve and display disk information with drive letters
   hosts: all
   gather_facts: no
   tasks:
-    - name: Get disk size using PowerShell
+    - name: Get volume information using PowerShell
       win_shell: |
-        $disks = Get-PhysicalDisk | Select-Object DeviceId, MediaType, @{
-          Name = 'SizeGB'
-          Expression = { [math]::Round($_.Size / 1GB, 2) }
-        } | ConvertTo-Json -Depth 2
-        Write-Output $disks
-      register: disk_info
+        $volumes = Get-Volume | Where-Object { $_.DriveLetter } | Select-Object `
+            DriveLetter, 
+            FileSystemType,
+            @{Name='TotalSizeGB'; Expression={[math]::Round($_.Size / 1GB, 2)}},
+            @{Name='FreeSpaceGB'; Expression={[math]::Round($_.SizeRemaining / 1GB, 2)}},
+            @{Name='PercentFree'; Expression={[math]::Round(($_.SizeRemaining / $_.Size) * 100, 2)}}
+        Write-Output ($volumes | ConvertTo-Json)
+      register: volume_info
 
-    - name: Display formatted disk information
+    - name: Display formatted volume information
       debug:
-        msg: "Disk {{ item.DeviceId }} ({{ item.MediaType }}): {{ item.SizeGB }} GB"
-      loop: "{{ disk_info.stdout | from_json }}"
+        msg: |
+          Drive {{ item.DriveLetter }}:
+          - Filesystem: {{ item.FileSystemType }}
+          - Total: {{ item.TotalSizeGB }} GB
+          - Free: {{ item.FreeSpaceGB }} GB ({{ item.PercentFree }}%)
+      loop: "{{ volume_info.stdout | from_json }}"
+      loop_control:
+        label: "Drive {{ item.DriveLetter }}"
