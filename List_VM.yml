@@ -1,39 +1,44 @@
+---
 - name: Enhanced Hyper-V VM List
   hosts: all
+  gather_facts: no
   tasks:
     - name: Get detailed VM information
       win_shell: |
-        Get-VM | Select-Object Name, State, 
+        $vms = Get-VM | Select-Object Name, State, 
             @{Name='CPUUsage'; Expression={$_.CPUUsage}},
             @{Name='MemoryAssignedGB'; Expression={[math]::Round($_.MemoryAssigned / 1GB, 2)}},
-            Status, Uptime | ConvertTo-Json -Depth 3
+            Status, 
+            @{Name='UptimeString'; Expression={$_.Uptime.ToString()}}
+        ConvertTo-Json -InputObject $vms -Depth 3
       register: vm_info
 
-    - name: Debug raw output
-      debug:
-        var: vm_info.stdout
-      
-    - name: Parse JSON properly
+    - name: Parse VM data
       set_fact:
-        parsed_vms: "{{ vm_info.stdout | from_json }}"
+        vm_list: "{{ vm_info.stdout | from_json }}"
         
-    - name: Force array format
+    - name: Ensure VM list is an array
       set_fact:
-        vm_array: "{{ [parsed_vms] if parsed_vms is mapping else parsed_vms }}"
-      
+        vm_array: "{{ [vm_list] if vm_list is mapping else vm_list }}"
+
     - name: Display formatted VM list
       debug:
         msg: |
-          🖥️  {{ item.Name }}
-          - State:       {{ item.State | default('Unknown') | ansible.builtin.replace('Off', '🔴 Stopped') | replace('On', '🟢 Running') }}
+          🖥️  {{ item.Name | default('Unknown VM') }}
+          - State:       {% if item.State == 'Off' %}🔴 Stopped{% elif item.State == 'On' %}🟢 Running{% else %}{{ item.State | default('Unknown') }}{% endif %}
           - CPU Usage:   {{ item.CPUUsage | default(0) }}%
           - Memory:      {{ item.MemoryAssignedGB | default(0) }} GB
           - Status:      {{ item.Status | default('Unknown') }}
-          - Uptime:      {{ (item.Uptime | default('0')).ToString().Split('.')[0] if item.Uptime is defined else 'N/A' }}
+          - Uptime:      {% if item.UptimeString is defined %}{{ item.UptimeString.split('.')[0] }}{% else %}N/A{% endif %}
       loop: "{{ vm_array }}"
       loop_control:
         label: "{{ item.Name | default('Unknown VM') }}"
       
+    - name: Count running and stopped VMs
+      set_fact:
+        running_vms: "{{ vm_array | selectattr('State', 'equalto', 'On') | list }}"
+        stopped_vms: "{{ vm_array | selectattr('State', 'equalto', 'Off') | list }}"
+      
     - name: Show VM summary
       debug:
-        msg: "Total VMs: {{ vm_array | length }} (🟢 {{ (vm_array | selectattr('State', 'equalto', 'On') | list | length) }} running, 🔴 {{ (vm_array | selectattr('State', 'equalto', 'Off') | list | length) }} stopped)"
+        msg: "Total VMs: {{ vm_array | length }} (🟢 {{ running_vms | length }} running, 🔴 {{ stopped_vms | length }} stopped)"
