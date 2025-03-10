@@ -3,24 +3,37 @@
   tasks:
     - name: Get detailed VM information
       win_shell: |
-        # Force array output even for single VM
-        @(Get-VM) | Select-Object Name, State, 
+        Get-VM | Select-Object Name, State, 
             @{Name='CPUUsage'; Expression={$_.CPUUsage}},
             @{Name='MemoryAssignedGB'; Expression={[math]::Round($_.MemoryAssigned / 1GB, 2)}},
-            Status,
-            @{Name='Uptime'; Expression={$_.Uptime.ToString()}} | 
-        ConvertTo-Json -Depth 4
+            Status, Uptime | ConvertTo-Json -Depth 3
       register: vm_info
 
+    - name: Debug raw output
+      debug:
+        var: vm_info.stdout
+      
+    - name: Parse JSON properly
+      set_fact:
+        parsed_vms: "{{ vm_info.stdout | from_json }}"
+        
+    - name: Force array format
+      set_fact:
+        vm_array: "{{ [parsed_vms] if parsed_vms is mapping else parsed_vms }}"
+      
     - name: Display formatted VM list
       debug:
         msg: |
           🖥️  {{ item.Name }}
-          - State:       {{ '🟢 Running' if item.State == 2 else '🔴 Stopped' }}
-          - CPU Usage:   {{ item.CPUUsage }}%
-          - Memory:      {{ item.MemoryAssignedGB }} GB
-          - Status:      {{ item.Status }}
-          - Uptime:     {{ item.Uptime.split('.')[0] }}
-      loop: "{{ (vm_info.stdout | from_json) | list }}"
+          - State:       {{ item.State | default('Unknown') | ansible.builtin.replace('Off', '🔴 Stopped') | replace('On', '🟢 Running') }}
+          - CPU Usage:   {{ item.CPUUsage | default(0) }}%
+          - Memory:      {{ item.MemoryAssignedGB | default(0) }} GB
+          - Status:      {{ item.Status | default('Unknown') }}
+          - Uptime:      {{ (item.Uptime | default('0')).ToString().Split('.')[0] if item.Uptime is defined else 'N/A' }}
+      loop: "{{ vm_array }}"
       loop_control:
-        label: "{{ item.Name }}"
+        label: "{{ item.Name | default('Unknown VM') }}"
+      
+    - name: Show VM summary
+      debug:
+        msg: "Total VMs: {{ vm_array | length }} (🟢 {{ (vm_array | selectattr('State', 'equalto', 'On') | list | length) }} running, 🔴 {{ (vm_array | selectattr('State', 'equalto', 'Off') | list | length) }} stopped)"
