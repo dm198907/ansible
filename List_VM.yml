@@ -1,11 +1,27 @@
-----
--- name: List all VMs on Hyper-V
--  hosts: all
--  tasks:
--    - name: Get list of VMs
--      win_shell: Get-VM | Select-Object -ExpandProperty Name
--      register: vm_list
--
--    - name: Display VM names
--      debug:
--        var: vm_list.stdout_lines
+- name: Enhanced Hyper-V VM List
+  hosts: all
+  tasks:
+    - name: Get detailed VM information
+      win_shell: |
+        Get-VM | Select-Object Name, State, 
+            @{Name='CPUUsage'; Expression={$_.CPUUsage}},
+            @{Name='MemoryAssignedGB'; Expression={[math]::Round($_.MemoryAssigned / 1GB, 2)}},
+            Status, Uptime | ConvertTo-Json
+      register: vm_info
+
+    - name: Display formatted VM list
+      debug:
+        msg: |
+          🖥️  {{ item.Name }}
+          - State:       {{ item.State | ansible.builtin.replace('Off', '🔴 Stopped') | replace('On', '🟢 Running') }}
+          - CPU Usage:   {{ item.CPUUsage }}%
+          - Memory:     {{ item.MemoryAssignedGB }} GB
+          - Status:      {{ item.Status }}
+          - Uptime:      {{ item.Uptime.ToString().Split('.')[0] }}  {# Remove milliseconds #}
+      loop: "{{ vm_info.stdout | from_json }}"
+      loop_control:
+        label: "{{ item.Name }}"
+
+    - name: Show VM summary
+      debug:
+        msg: "Total VMs: {{ (vm_info.stdout | from_json) | length }} (🟢 {{ (vm_info.stdout | from_json | selectattr('State', 'equalto', 'On') | list | length) }} running, 🔴 {{ (vm_info.stdout | from_json | selectattr('State', 'equalto', 'Off') | list | length) }} stopped)"
