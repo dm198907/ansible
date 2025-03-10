@@ -1,6 +1,6 @@
 ---
 - name: Playbook Name
-  hosts: win
+  hosts: all
   gather_facts: true
   tasks:
     - name :  Find all services that start with 'win'
