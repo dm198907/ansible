@@ -1,6 +1,6 @@
 ----
 -- name: List all VMs on Hyper-V
--  hosts: win
+-  hosts: all
 -  tasks:
 -    - name: Get list of VMs
 -      win_shell: Get-VM | Select-Object -ExpandProperty Name
