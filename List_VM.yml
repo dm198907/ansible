@@ -3,25 +3,24 @@
   tasks:
     - name: Get detailed VM information
       win_shell: |
-        Get-VM | Select-Object Name, State, 
+        # Force array output even for single VM
+        @(Get-VM) | Select-Object Name, State, 
             @{Name='CPUUsage'; Expression={$_.CPUUsage}},
             @{Name='MemoryAssignedGB'; Expression={[math]::Round($_.MemoryAssigned / 1GB, 2)}},
-            Status, Uptime | ConvertTo-Json
+            Status,
+            @{Name='Uptime'; Expression={$_.Uptime.ToString()}} | 
+        ConvertTo-Json -Depth 4
       register: vm_info
 
     - name: Display formatted VM list
       debug:
         msg: |
           🖥️  {{ item.Name }}
-          - State:       {{ item.State | ansible.builtin.replace('Off', '🔴 Stopped') | replace('On', '🟢 Running') }}
+          - State:       {{ '🟢 Running' if item.State == 2 else '🔴 Stopped' }}
           - CPU Usage:   {{ item.CPUUsage }}%
-          - Memory:     {{ item.MemoryAssignedGB }} GB
+          - Memory:      {{ item.MemoryAssignedGB }} GB
           - Status:      {{ item.Status }}
-          - Uptime:      {{ item.Uptime.ToString().Split('.')[0] }}  {# Remove milliseconds #}
-      loop: "{{ vm_info.stdout | from_json }}"
+          - Uptime:     {{ item.Uptime.split('.')[0] }}
+      loop: "{{ (vm_info.stdout | from_json) | list }}"
       loop_control:
         label: "{{ item.Name }}"
-
-    - name: Show VM summary
-      debug:
-        msg: "Total VMs: {{ (vm_info.stdout | from_json) | length }} (🟢 {{ (vm_info.stdout | from_json | selectattr('State', 'equalto', 'On') | list | length) }} running, 🔴 {{ (vm_info.stdout | from_json | selectattr('State', 'equalto', 'Off') | list | length) }} stopped)"
