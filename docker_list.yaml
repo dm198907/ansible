@@ -1,0 +1,10 @@
+---
+- name: Update all running Docker containers
+  hosts: nas
+  become: true
+  tasks:
+    - name: Gather running containers
+      community.docker.docker_container_info:
+        filters:
+          status: running
+      register: running_containers
