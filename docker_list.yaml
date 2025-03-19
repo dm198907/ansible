@@ -1,6 +1,6 @@
 ---
 - name: Update all running Docker containers
-  hosts: nas
+  hosts: all
   become: true
   tasks:
     - name: Gather running containers
