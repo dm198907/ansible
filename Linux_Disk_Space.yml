@@ -7,7 +7,7 @@
     sftp_user: "dharmesh"
     sftp_password: "Thankgod@123"
     local_output_file: "/tmp/disk_usage.txt"
-    remote_path: "disk_usage.txt"  # File destination on SFTP
+    remote_path: "/imp/sfs_ansible/disk_usage.txt"  # File destination on SFTP
 
   tasks:
     - name: Ensure duf is installed
