@@ -1,17 +1,17 @@
 ---
 - name: Get Disk Usage and Transfer to SFTP
   hosts: all
-  become: yes
   vars:
     sftp_host: "dmnetcloud"
     sftp_port: "2022"
     sftp_user: "dharmesh"
     sftp_password: "Thankgod@123"
     local_output_file: "/tmp/disk_usage.txt"
-    remote_path: "/imp/sftp_ansible/disk_usage.txt"  # File destination on SFTP
+    remote_path: "disk_usage.txt"  # File destination on SFTP
 
   tasks:
     - name: Ensure duf is installed
+      become: yes  # Keep sudo for package installation
       apt:
         name: duf
         state: present
@@ -26,10 +26,12 @@
         dest: "{{ local_output_file }}"
 
     - name: Transfer disk usage file to SFTP server
-      delegate_to: localhost  # Run from Ansible control node
+      delegate_to: localhost  # Ensure it's run from Ansible control node
+      become: no  # Disable sudo
       shell: "sshpass -p '{{ sftp_password }}' sftp -o StrictHostKeyChecking=no -P {{ sftp_port }} {{ sftp_user }}@{{ sftp_host }} <<< $'put {{ local_output_file }} {{ remote_path }}'"
 
     - name: Remove the local disk usage file after transfer
+      become: no  # Disable sudo
       file:
         path: "{{ local_output_file }}"
         state: absent
