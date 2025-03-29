@@ -1,6 +1,6 @@
 ---
 - name: Simple Disk Usage Report with SFTP Upload
-  hosts: debian_servers
+  hosts: all
   gather_facts: yes
   vars:
     sftp_host: "dmnetcloud"
