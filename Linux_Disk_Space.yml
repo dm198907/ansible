@@ -1,5 +1,5 @@
 ---
-- name: Disk Usage Report without Overlay and Network Mounts
+- name: Disk Usage Report without Overlay, tmpfs, and Network Mounts
   hosts: all
   gather_facts: yes
   vars:
@@ -8,11 +8,12 @@
     sftp_user: "dharmesh"
     sftp_password: "Thankgod@123"
     remote_path: "/imp/sfs_ansible"
-    report_file: "/tmp/disk_usage_report_{{ ansible_hostname }}.txt"
+    timestamp: "{{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}_{{ ansible_date_time.hour }}{{ ansible_date_time.minute }}"
+    report_file: "/tmp/{{ ansible_hostname }}_{{ timestamp }}.txt"
 
   tasks:
-    - name: Collect disk usage excluding overlay and network mounts
-      shell: df -h | awk 'NR>1 && $1 !~ /overlay/ && $1 !~ /^\/\// {print $5 " used on " $1 " (" $2 " total, " $4 " free)"}'
+    - name: Collect disk usage excluding overlay, tmpfs, and network mounts
+      shell: df -h | awk 'NR>1 && $1 !~ /overlay/ && $1 !~ /^\/\// && $1 !~ /tmpfs/ {print $5 " used on " $1 " (" $2 " total, " $4 " free)"}'
       register: df_output
 
     - name: Create disk usage report file
@@ -20,7 +21,7 @@
         content: |
           ===================================================
           DISK USAGE REPORT FOR {{ ansible_hostname }}
-          Generated on {{ ansible_date_time.date }}
+          Generated on {{ ansible_date_time.date }} at {{ ansible_date_time.time }}
           ===================================================
           
           {{ df_output.stdout }}
