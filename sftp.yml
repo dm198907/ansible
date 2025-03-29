@@ -20,10 +20,7 @@
     - name: Upload test file via SFTP (Port 2022)
       shell: "sshpass -p '{{ sftp_password }}' sftp -o StrictHostKeyChecking=no -P {{ sftp_port }} {{ sftp_user }}@{{ sftp_host }} <<< $'put {{ test_file }} {{ remote_path }}'"
 
-    - name: Remove local test file
-      file:
-        path: "{{ test_file }}"
-        state: absent
+    
 
     - name: Test completed
       debug:
