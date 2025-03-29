@@ -1,41 +1,50 @@
 ---
 - name: Get Disk Usage and Transfer to SFTP
   hosts: all
+  gather_facts: yes
   vars:
     sftp_host: "dmnetcloud"
-    sftp_port: "2022"
+    sftp_port: 2022
     sftp_user: "dharmesh"
     sftp_password: "Thankgod@123"
-    local_output_file: "/tmp/disk_usage.txt"
-    remote_path: "/imp/sfs_ansible/disk_usage.txt"  # File destination on SFTP
+    remote_path: "/imp/sfs_ansible/disk_usage_{{ inventory_hostname }}.txt"
 
   tasks:
-    - name: Ensure duf is installed
-      become: yes  # Keep sudo for package installation
-      apt:
-        name: duf
-        state: present
-
-    - name: Get disk usage information with duf
-      command: duf
-      register: duf_output
+    - name: Gather disk usage information
+      set_fact:
+        disk_usage: |
+          {% for mount in ansible_mounts %}
+          Mount point: {{ mount.mount }}
+          Filesystem: {{ mount.device }}
+          Total Size: {{ mount.size_total | human_readable }}
+          Used: {{ mount.size_used | human_readable }}
+          Available: {{ mount.size_available | human_readable }}
+          Use%: {{ (mount.size_used * 100 / mount.size_total) | round(2) }}%
+          {% endfor %}
 
     - name: Save disk usage information to a local file
       copy:
-        content: "{{ duf_output.stdout }}"
-        dest: "{{ local_output_file }}"
+        content: "{{ disk_usage }}"
+        dest: "/tmp/disk_usage_{{ inventory_hostname }}.txt"
 
     - name: Transfer disk usage file to SFTP server
-      delegate_to: localhost  # Ensure it's run from Ansible control node
-      become: no  # Disable sudo
-      shell: "sshpass -p '{{ sftp_password }}' sftp -o StrictHostKeyChecking=no -P {{ sftp_port }} {{ sftp_user }}@{{ sftp_host }} <<< $'put {{ local_output_file }} {{ remote_path }}'"
+      delegate_to: localhost
+      ansible.builtin.copy:
+        src: "/tmp/disk_usage_{{ inventory_hostname }}.txt"
+        dest: "{{ remote_path }}"
+        mode: '0644'
+      vars:
+        ansible_user: "{{ sftp_user }}"
+        ansible_password: "{{ sftp_password }}"
+        ansible_port: "{{ sftp_port }}"
+        ansible_host: "{{ sftp_host }}"
+        ansible_connection: ssh
 
     - name: Remove the local disk usage file after transfer
-      become: no  # Disable sudo
       file:
-        path: "{{ local_output_file }}"
+        path: "/tmp/disk_usage_{{ inventory_hostname }}.txt"
         state: absent
 
     - name: Display completion message
       debug:
-        msg: "Disk usage report successfully uploaded to SFTP!"
+        msg: "Disk usage report for {{ inventory_hostname }} successfully uploaded to SFTP!"
