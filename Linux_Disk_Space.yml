@@ -15,14 +15,23 @@
       command: df -h
       register: disk_usage_output
 
+    - name: Debug disk usage output
+      debug:
+        var: disk_usage_output.stdout
+
     - name: Save disk usage information to a local file
       copy:
         content: "{{ disk_usage_output.stdout }}"
         dest: "{{ local_output_file }}"
 
-    - name: Transfer disk usage file to SFTP server
+    - name: Transfer disk usage file to SFTP server with verbose output
       delegate_to: localhost
-      shell: "sshpass -p '{{ sftp_password }}' sftp -o StrictHostKeyChecking=no -P {{ sftp_port }} {{ sftp_user }}@{{ sftp_host }} <<< $'put {{ local_output_file }} {{ remote_path }}'"
+      shell: "sshpass -p '{{ sftp_password }}' sftp -vvv -o StrictHostKeyChecking=no -P {{ sftp_port }} {{ sftp_user }}@{{ sftp_host }} <<< $'put {{ local_output_file }} {{ remote_path }}'"
+      register: sftp_debug_output
+
+    - name: Debug SFTP output
+      debug:
+        var: sftp_debug_output.stdout_lines
 
     - name: Remove the local disk usage file after transfer
       file:
