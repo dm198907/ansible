@@ -8,7 +8,7 @@
     sftp_user: "dharmesh"
     sftp_password: "Thankgod@123"
     local_output_file: "/tmp/disk_usage.txt"
-    remote_path: "/imp/sftp_ansible/disk_usage.txt"  # SFTP destination file name
+    remote_path: "/imp/sftp_ansible/disk_usage.txt"  # File destination on SFTP
 
   tasks:
     - name: Ensure duf is installed
@@ -26,8 +26,8 @@
         dest: "{{ local_output_file }}"
 
     - name: Transfer disk usage file to SFTP server
+      delegate_to: localhost  # Run from Ansible control node
       shell: "sshpass -p '{{ sftp_password }}' sftp -o StrictHostKeyChecking=no -P {{ sftp_port }} {{ sftp_user }}@{{ sftp_host }} <<< $'put {{ local_output_file }} {{ remote_path }}'"
-      delegate_to: localhost
 
     - name: Remove the local disk usage file after transfer
       file:
