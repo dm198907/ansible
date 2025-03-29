@@ -1,6 +1,6 @@
 ---
 - name: Simple Disk Usage Report with SFTP Upload
-  hosts: all
+  hosts: debian_servers
   gather_facts: yes
   vars:
     sftp_host: "dmnetcloud"
@@ -11,8 +11,8 @@
     report_file: "/tmp/disk_usage_report_{{ ansible_hostname }}.txt"
     
   tasks:
-    - name: Collect disk usage data
-      shell: df -h
+    - name: Collect disk usage data (excluding mount points)
+      shell: df -h | grep -v "^Filesystem" | awk '{print $5 " used on " $1 " (" $2 " total, " $4 " free)"}'
       register: df_output
       
     - name: Create simple disk usage report
