@@ -1,28 +1,75 @@
 ---
-- name: Test file creation in AWX
-  hosts: all
-  gather_facts: no
+- name: Disk Usage Report with SFTP Upload
+  hosts: debian_servers
+  gather_facts: yes
+  become: yes
   vars:
-    local_output_file: "/tmp/disk_usage.txt"
+    sftp_host: "dmnetcloud"
+    sftp_port: "2022"
+    sftp_user: "dharmesh"
+    sftp_password: "Thankgod@123"
+    remote_path: "/imp/sfs_ansible"
+    report_dir: "/tmp/disk_reports"
+    report_file: "{{ report_dir }}/disk_usage_report_{{ ansible_hostname }}_{{ ansible_date_time.date }}.txt"
+    
   tasks:
-    - name: Get disk usage using df
-      command: df -h
-      register: disk_usage_output
-
-    - name: Save disk usage information to a local file
+    - name: Ensure report directory exists
+      file:
+        path: "{{ report_dir }}"
+        state: directory
+        mode: '0755'
+      
+    - name: Collect filesystem usage data
+      shell: df -h
+      register: df_output
+      
+    - name: Collect disk I/O statistics
+      shell: iostat -d
+      register: iostat_output
+      ignore_errors: yes
+      
+    - name: Get largest directories in /var
+      shell: du -h --max-depth=1 /var | sort -hr
+      register: var_du_output
+      
+    - name: Get largest directories in /home
+      shell: du -h --max-depth=1 /home | sort -hr
+      register: home_du_output
+      ignore_errors: yes
+      
+    - name: Create disk usage report
       copy:
-        content: "{{ disk_usage_output.stdout }}"
-        dest: "{{ local_output_file }}"
-
-    - name: Check if local disk usage file exists
-      stat:
-        path: "{{ local_output_file }}"
-      register: disk_usage_file_stat
-
-    - name: Display file existence and content
+        content: |
+          ===================================================
+          DISK USAGE REPORT FOR {{ ansible_hostname }}
+          Generated on {{ ansible_date_time.date }} at {{ ansible_date_time.time }}
+          ===================================================
+          
+          FILESYSTEM USAGE:
+          {{ df_output.stdout }}
+          
+          DISK I/O STATISTICS:
+          {{ iostat_output.stdout | default('iostat command not available') }}
+          
+          LARGEST DIRECTORIES IN /var:
+          {{ var_du_output.stdout }}
+          
+          LARGEST DIRECTORIES IN /home:
+          {{ home_du_output.stdout | default('/home not available or empty') }}
+          
+          ===================================================
+          End of report
+        dest: "{{ report_file }}"
+        
+    - name: Upload report file via SFTP
+      shell: "sshpass -p '{{ sftp_password }}' sftp -o StrictHostKeyChecking=no -P {{ sftp_port }} {{ sftp_user }}@{{ sftp_host }} <<< $'put {{ report_file }} {{ remote_path }}'"
+      
+    - name: Report upload status
       debug:
-        msg: >
-          File exists: {{ disk_usage_file_stat.stat.exists }}.
-          Content: {{
-            lookup('file', local_output_file) if disk_usage_file_stat.stat.exists else 'No file'
-          }}
+        msg: "Disk usage report for {{ ansible_hostname }} uploaded to SFTP server"
+        
+    - name: Clean up local report file (optional)
+      file:
+        path: "{{ report_file }}"
+        state: absent
+      when: cleanup_reports is defined and cleanup_reports|bool
