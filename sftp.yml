@@ -7,7 +7,7 @@
     sftp_port: "2022"
     sftp_user: "dharmesh"
     sftp_password: "Thankgod@123"
-    remote_path: "/impsfs_ansible"
+    remote_path: "/imp/sfs_ansible"
     test_file: "/tmp/sftp_test.txt"
 
   tasks:
