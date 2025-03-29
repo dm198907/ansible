@@ -1,4 +1,5 @@
-- name: Get Debian OS Disk Usage and Save Locally
+---
+- name: Test file creation in AWX
   hosts: all
   gather_facts: no
   vars:
@@ -18,6 +19,10 @@
         path: "{{ local_output_file }}"
       register: disk_usage_file_stat
 
-    - name: Display file existence
+    - name: Display file existence and content
       debug:
-        msg: "Local disk usage file exists: {{ disk_usage_file_stat.stat.exists }}"
+        msg: >
+          File exists: {{ disk_usage_file_stat.stat.exists }}.
+          Content: {{
+            lookup('file', local_output_file) if disk_usage_file_stat.stat.exists else 'No file'
+          }}
