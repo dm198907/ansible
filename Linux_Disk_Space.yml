@@ -1,50 +1,34 @@
 ---
-- name: Get Disk Usage and Transfer to SFTP
+- name: Get Debian OS Disk Usage and Transfer to SFTP
   hosts: all
-  gather_facts: yes
+  gather_facts: no
   vars:
     sftp_host: "dmnetcloud"
-    sftp_port: 2022
+    sftp_port: "2022"
     sftp_user: "dharmesh"
     sftp_password: "Thankgod@123"
-    remote_path: "/imp/sfs_ansible/disk_usage_{{ inventory_hostname }}.txt"
+    local_output_file: "/tmp/disk_usage.txt"
+    remote_path: "/imp/sfs_ansible/disk_usage.txt"
 
   tasks:
-    - name: Gather disk usage information
-      set_fact:
-        disk_usage: |
-          {% for mount in ansible_mounts %}
-          Mount point: {{ mount.mount }}
-          Filesystem: {{ mount.device }}
-          Total Size: {{ mount.size_total | human_readable }}
-          Used: {{ mount.size_used | human_readable }}
-          Available: {{ mount.size_available | human_readable }}
-          Use%: {{ (mount.size_used * 100 / mount.size_total) | round(2) }}%
-          {% endfor %}
+    - name: Get disk usage using df
+      command: df -h
+      register: disk_usage_output
 
     - name: Save disk usage information to a local file
       copy:
-        content: "{{ disk_usage }}"
-        dest: "/tmp/disk_usage_{{ inventory_hostname }}.txt"
+        content: "{{ disk_usage_output.stdout }}"
+        dest: "{{ local_output_file }}"
 
     - name: Transfer disk usage file to SFTP server
       delegate_to: localhost
-      ansible.builtin.copy:
-        src: "/tmp/disk_usage_{{ inventory_hostname }}.txt"
-        dest: "{{ remote_path }}"
-        mode: '0644'
-      vars:
-        ansible_user: "{{ sftp_user }}"
-        ansible_password: "{{ sftp_password }}"
-        ansible_port: "{{ sftp_port }}"
-        ansible_host: "{{ sftp_host }}"
-        ansible_connection: ssh
+      shell: "sshpass -p '{{ sftp_password }}' sftp -o StrictHostKeyChecking=no -P {{ sftp_port }} {{ sftp_user }}@{{ sftp_host }} <<< $'put {{ local_output_file }} {{ remote_path }}'"
 
     - name: Remove the local disk usage file after transfer
       file:
-        path: "/tmp/disk_usage_{{ inventory_hostname }}.txt"
+        path: "{{ local_output_file }}"
         state: absent
 
     - name: Display completion message
       debug:
-        msg: "Disk usage report for {{ inventory_hostname }} successfully uploaded to SFTP!"
+        msg: "Disk usage report successfully uploaded to SFTP!"
