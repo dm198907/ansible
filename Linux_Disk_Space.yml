@@ -1,43 +1,23 @@
----
-- name: Get Debian OS Disk Usage and Transfer to SFTP
+- name: Get Debian OS Disk Usage and Save Locally
   hosts: all
   gather_facts: no
   vars:
-    sftp_host: "dmnetcloud"
-    sftp_port: "2022"
-    sftp_user: "dharmesh"
-    sftp_password: "Thankgod@123"
     local_output_file: "/tmp/disk_usage.txt"
-    remote_path: "/imp/sfs_ansible/disk_usage.txt"
-
   tasks:
     - name: Get disk usage using df
       command: df -h
       register: disk_usage_output
-
-    - name: Debug disk usage output
-      debug:
-        var: disk_usage_output.stdout
 
     - name: Save disk usage information to a local file
       copy:
         content: "{{ disk_usage_output.stdout }}"
         dest: "{{ local_output_file }}"
 
-    - name: Transfer disk usage file to SFTP server with verbose output
-      delegate_to: localhost
-      shell: "sshpass -p '{{ sftp_password }}' sftp -vvv -o StrictHostKeyChecking=no -P {{ sftp_port }} {{ sftp_user }}@{{ sftp_host }} <<< $'put {{ local_output_file }} {{ remote_path }}'"
-      register: sftp_debug_output
-
-    - name: Debug SFTP output
-      debug:
-        var: sftp_debug_output.stdout_lines
-
-    - name: Remove the local disk usage file after transfer
-      file:
+    - name: Check if local disk usage file exists
+      stat:
         path: "{{ local_output_file }}"
-        state: absent
+      register: disk_usage_file_stat
 
-    - name: Display completion message
+    - name: Display file existence
       debug:
-        msg: "Disk usage report successfully uploaded to SFTP!"
+        msg: "Local disk usage file exists: {{ disk_usage_file_stat.stat.exists }}"
