@@ -7,7 +7,7 @@
     sftp_port: "2022"
     sftp_user: "dharmesh"
     sftp_password: "Thankgod@123"
-    remote_path: "/srv/sftpgo"
+    remote_path: "https://dmnetcloud.tail91bff.ts.net:8081/web/client/pubshares/qetzSYoAKhQZ8VxyuF2S9V/upload"
     test_file: "/tmp/sftp_test.txt"
 
   tasks:
