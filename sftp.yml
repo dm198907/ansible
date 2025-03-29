@@ -4,6 +4,7 @@
   gather_facts: no
   vars:
     sftp_host: "dmnetcloud"
+    sftp_port: "2022"
     sftp_user: "dharmesh"
     sftp_password: "Thankgod@123"
     remote_path: "/srv/sftpgo"
@@ -16,8 +17,8 @@
         content: "Ansible SFTP test file"
         dest: "{{ test_file }}"
 
-    - name: Upload test file via SFTP
-      shell: "sshpass -p '{{ sftp_password }}' sftp -o StrictHostKeyChecking=no {{ sftp_user }}@{{ sftp_host }} <<< $'put {{ test_file }} {{ remote_path }}'"
+    - name: Upload test file via SFTP (Port 2022)
+      shell: "sshpass -p '{{ sftp_password }}' sftp -o StrictHostKeyChecking=no -P {{ sftp_port }} {{ sftp_user }}@{{ sftp_host }} <<< $'put {{ test_file }} {{ remote_path }}'"
 
     - name: Remove local test file
       file:
