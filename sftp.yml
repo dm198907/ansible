@@ -1,0 +1,29 @@
+---
+- name: Simple SFTP Test
+  hosts: localhost
+  gather_facts: no
+  vars:
+    sftp_host: "sftp.example.com"
+    sftp_user: "your_sftp_user"
+    sftp_password: "your_sftp_password"
+    remote_path: "/sftp_upload"
+    test_file: "/tmp/sftp_test.txt"
+
+  tasks:
+
+    - name: Create a test file
+      copy:
+        content: "Ansible SFTP test file"
+        dest: "{{ test_file }}"
+
+    - name: Upload test file via SFTP
+      shell: "sshpass -p '{{ sftp_password }}' sftp -o StrictHostKeyChecking=no {{ sftp_user }}@{{ sftp_host }} <<< $'put {{ test_file }} {{ remote_path }}'"
+
+    - name: Remove local test file
+      file:
+        path: "{{ test_file }}"
+        state: absent
+
+    - name: Test completed
+      debug:
+        msg: "SFTP test completed successfully!"
