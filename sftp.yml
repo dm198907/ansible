@@ -1,41 +1,27 @@
 ---
-- name: Copy Existing Test Folder to SFTP
-  hosts: all
+- name: Simple SFTP Test
+  hosts: localhost
   gather_facts: no
   vars:
-    test_folder: "/tmp/test_folder"
     sftp_host: "dmnetcloud"
     sftp_port: "2022"
     sftp_user: "dharmesh"
     sftp_password: "Thankgod@123"
     remote_path: "/imp/sfs_ansible"
+    test_file: "/tmp/sftp_test.txt"
 
   tasks:
-    - name: Check if test folder exists
-      stat:
-        path: "{{ test_folder }}"
-      register: folder_stat
 
-    - name: Fail if test folder does not exist
-      fail:
-        msg: "The test folder does not exist at {{ test_folder }}"
-      when: not folder_stat.stat.exists
+    - name: Create a test file
+      copy:
+        content: "Ansible SFTP test file"
+        dest: "{{ test_file }}"
 
-    - name: Archive the existing test folder (tar.gz)
-      archive:
-        path: "{{ test_folder }}"
-        dest: "{{ test_folder }}.tar.gz"
-        format: gz
+    - name: Upload test file via SFTP (Port 2022)
+      shell: "sshpass -p '{{ sftp_password }}' sftp -o StrictHostKeyChecking=no -P {{ sftp_port }} {{ sftp_user }}@{{ sftp_host }} <<< $'put {{ test_file }} {{ remote_path }}'"
 
-    - name: Transfer archived test folder to SFTP server
-      delegate_to: localhost
-      shell: "sshpass -p '{{ sftp_password }}' sftp -o StrictHostKeyChecking=no -P {{ sftp_port }} {{ sftp_user }}@{{ sftp_host }} <<< $'put {{ test_folder }}.tar.gz {{ remote_path }}'"
+    
 
-    - name: Remove local archived file after transfer
-      file:
-        path: "{{ test_folder }}.tar.gz"
-        state: absent
-
-    - name: Debug message
+    - name: Test completed
       debug:
-        msg: "Existing test folder successfully archived and transferred to SFTP!"
+        msg: "SFTP test completed successfully!"
