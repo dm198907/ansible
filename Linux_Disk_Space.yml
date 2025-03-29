@@ -1,75 +1,48 @@
 ---
-- name: Disk Usage Report with SFTP Upload
+- name: Simple Disk Usage Report with SFTP Upload
   hosts: all
   gather_facts: yes
-  become: yes
   vars:
     sftp_host: "dmnetcloud"
     sftp_port: "2022"
     sftp_user: "dharmesh"
     sftp_password: "Thankgod@123"
     remote_path: "/imp/sfs_ansible"
-    report_dir: "/tmp/disk_reports"
-    report_file: "{{ report_dir }}/disk_usage_report_{{ ansible_hostname }}_{{ ansible_date_time.date }}.txt"
+    report_file: "/tmp/disk_usage_report_{{ ansible_hostname }}.txt"
     
   tasks:
-    - name: Ensure report directory exists
-      file:
-        path: "{{ report_dir }}"
-        state: directory
-        mode: '0755'
-      
-    - name: Collect filesystem usage data
+    - name: Collect disk usage data
       shell: df -h
       register: df_output
       
-    - name: Collect disk I/O statistics
-      shell: iostat -d
-      register: iostat_output
-      ignore_errors: yes
-      
-    - name: Get largest directories in /var
-      shell: du -h --max-depth=1 /var | sort -hr
-      register: var_du_output
-      
-    - name: Get largest directories in /home
-      shell: du -h --max-depth=1 /home | sort -hr
-      register: home_du_output
-      ignore_errors: yes
-      
-    - name: Create disk usage report
+    - name: Create simple disk usage report
       copy:
         content: |
           ===================================================
           DISK USAGE REPORT FOR {{ ansible_hostname }}
-          Generated on {{ ansible_date_time.date }} at {{ ansible_date_time.time }}
+          Generated on {{ ansible_date_time.date }}
           ===================================================
           
-          FILESYSTEM USAGE:
           {{ df_output.stdout }}
           
-          DISK I/O STATISTICS:
-          {{ iostat_output.stdout | default('iostat command not available') }}
-          
-          LARGEST DIRECTORIES IN /var:
-          {{ var_du_output.stdout }}
-          
-          LARGEST DIRECTORIES IN /home:
-          {{ home_du_output.stdout | default('/home not available or empty') }}
-          
           ===================================================
-          End of report
         dest: "{{ report_file }}"
         
-    - name: Upload report file via SFTP
-      shell: "sshpass -p '{{ sftp_password }}' sftp -o StrictHostKeyChecking=no -P {{ sftp_port }} {{ sftp_user }}@{{ sftp_host }} <<< $'put {{ report_file }} {{ remote_path }}'"
+    - name: Install sshpass if not present
+      package:
+        name: sshpass
+        state: present
+      become: yes
       
+    - name: Upload report via SFTP using simple command
+      shell: |
+        echo "{{ sftp_password }}" | sshpass -p "{{ sftp_password }}" sftp -o StrictHostKeyChecking=no -P {{ sftp_port }} {{ sftp_user }}@{{ sftp_host }}:{{ remote_path }} << EOF
+        put {{ report_file }}
+        bye
+        EOF
+      args:
+        executable: /bin/bash
+        
     - name: Report upload status
       debug:
-        msg: "Disk usage report for {{ ansible_hostname }} uploaded to SFTP server"
-        
-    - name: Clean up local report file (optional)
-      file:
-        path: "{{ report_file }}"
-        state: absent
-      when: cleanup_reports is defined and cleanup_reports|bool
+        msg: "Disk usage report uploaded to SFTP server"
