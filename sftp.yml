@@ -6,7 +6,7 @@
     sftp_host: "dmnetcloud"
     sftp_user: "dharmesh"
     sftp_password: "Thankgod@123"
-    remote_path: "/MyData"
+    remote_path: "/srv/sftpgo"
     test_file: "/tmp/sftp_test.txt"
 
   tasks:
