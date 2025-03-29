@@ -1,6 +1,6 @@
 ---
-- name: Simple Disk Usage Report with SFTP Upload
-  hosts: all
+- name: Disk Usage Report without Overlay and Network Mounts
+  hosts: debian_servers
   gather_facts: yes
   vars:
     sftp_host: "dmnetcloud"
@@ -9,13 +9,13 @@
     sftp_password: "Thankgod@123"
     remote_path: "/imp/sfs_ansible"
     report_file: "/tmp/disk_usage_report_{{ ansible_hostname }}.txt"
-    
+
   tasks:
-    - name: Collect disk usage data (excluding mount points)
-      shell: df -h | grep -v "^Filesystem" | awk '{print $5 " used on " $1 " (" $2 " total, " $4 " free)"}'
+    - name: Collect disk usage excluding overlay and network mounts
+      shell: df -h | awk 'NR>1 && $1 !~ /overlay/ && $1 !~ /^\/\// {print $5 " used on " $1 " (" $2 " total, " $4 " free)"}'
       register: df_output
-      
-    - name: Create simple disk usage report
+
+    - name: Create disk usage report file
       copy:
         content: |
           ===================================================
@@ -27,22 +27,22 @@
           
           ===================================================
         dest: "{{ report_file }}"
-        
-    - name: Install sshpass if not present
+
+    - name: Ensure sshpass is installed
       package:
         name: sshpass
         state: present
       become: yes
-      
-    - name: Upload report via SFTP using simple command
+
+    - name: Upload report via SFTP
       shell: |
-        echo "{{ sftp_password }}" | sshpass -p "{{ sftp_password }}" sftp -o StrictHostKeyChecking=no -P {{ sftp_port }} {{ sftp_user }}@{{ sftp_host }}:{{ remote_path }} << EOF
-        put {{ report_file }}
+        sshpass -p "{{ sftp_password }}" sftp -o StrictHostKeyChecking=no -P {{ sftp_port }} {{ sftp_user }}@{{ sftp_host }} << EOF
+        put {{ report_file }} {{ remote_path }}
         bye
         EOF
       args:
         executable: /bin/bash
-        
-    - name: Report upload status
+
+    - name: Confirm report upload
       debug:
-        msg: "Disk usage report uploaded to SFTP server"
+        msg: "Disk usage report successfully uploaded to SFTP: {{ remote_path }}/{{ report_file | basename }}"
