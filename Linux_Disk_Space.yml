@@ -1,19 +1,39 @@
 ---
-- name: Show Disk Usage with duf
+- name: Get Disk Usage and Transfer to SFTP
   hosts: all
   become: yes
+  vars:
+    sftp_host: "dmnetcloud"
+    sftp_port: "2022"
+    sftp_user: "dharmesh"
+    sftp_password: "Thankgod@123"
+    local_output_file: "/tmp/disk_usage.txt"
+    remote_path: "/imp/sftp_ansible/disk_usage.txt"  # SFTP destination file name
 
   tasks:
     - name: Ensure duf is installed
       apt:
         name: duf
         state: present
-      # Adjust this task if your system uses a different package manager or if you need to add a repository.
 
     - name: Get disk usage information with duf
       command: duf
       register: duf_output
 
-    - name: Display disk usage information
-      ansible.builtin.debug:
-        msg: "{{ duf_output.stdout }}"
+    - name: Save disk usage information to a local file
+      copy:
+        content: "{{ duf_output.stdout }}"
+        dest: "{{ local_output_file }}"
+
+    - name: Transfer disk usage file to SFTP server
+      shell: "sshpass -p '{{ sftp_password }}' sftp -o StrictHostKeyChecking=no -P {{ sftp_port }} {{ sftp_user }}@{{ sftp_host }} <<< $'put {{ local_output_file }} {{ remote_path }}'"
+      delegate_to: localhost
+
+    - name: Remove the local disk usage file after transfer
+      file:
+        path: "{{ local_output_file }}"
+        state: absent
+
+    - name: Display completion message
+      debug:
+        msg: "Disk usage report successfully uploaded to SFTP!"
