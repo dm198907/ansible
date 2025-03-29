@@ -1,6 +1,6 @@
 ---
 - name: Disk Usage Report without Overlay and Network Mounts
-  hosts: debian_servers
+  hosts: all
   gather_facts: yes
   vars:
     sftp_host: "dmnetcloud"
