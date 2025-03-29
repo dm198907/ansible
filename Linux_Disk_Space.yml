@@ -1,6 +1,6 @@
 ---
 - name: Disk Usage Report with SFTP Upload
-  hosts: debian_servers
+  hosts: all
   gather_facts: yes
   become: yes
   vars:
