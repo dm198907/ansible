@@ -1,0 +1,127 @@
+---
+- name: Setup Docker, Kubernetes, Docker Compose, and LXC on Debian
+  hosts: all
+  become: true
+
+  tasks:
+
+    - name: Install required apt packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - software-properties-common
+        update_cache: yes
+
+    # ------------------------
+    # Install Docker
+    # ------------------------
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/debian/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+        state: present
+        filename: docker
+
+    - name: Install Docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: latest
+        update_cache: yes
+
+    - name: Ensure Docker is started and enabled
+      service:
+        name: docker
+        enabled: true
+        state: started
+
+    # ------------------------
+    # Install Docker Compose v2 (plugin)
+    # ------------------------
+    - name: Download Docker Compose plugin
+      get_url:
+        url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-linux-x86_64"
+        dest: /usr/local/lib/docker/cli-plugins/docker-compose
+        mode: '0755'
+
+    - name: Create symlink for Docker Compose
+      file:
+        src: /usr/local/lib/docker/cli-plugins/docker-compose
+        dest: /usr/bin/docker-compose
+        state: link
+        force: true
+
+    # ------------------------
+    # Install Kubernetes
+    # ------------------------
+    - name: Add Kubernetes APT key
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+
+    - name: Add Kubernetes repository
+      apt_repository:
+        repo: "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+        state: present
+
+    - name: Install Kubernetes tools
+      apt:
+        name:
+          - kubelet={{ kubernetes_version }}
+          - kubeadm={{ kubernetes_version }}
+          - kubectl={{ kubernetes_version }}
+        state: present
+        update_cache: yes
+
+    - name: Hold Kubernetes packages
+      apt:
+        name:
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: hold
+
+    - name: Disable swap (required for Kubernetes)
+      command: swapoff -a
+
+    - name: Comment swap line in fstab
+      replace:
+        path: /etc/fstab
+        regexp: '^([^#].*swap.*)$'
+        replace: '# \1'
+
+    # ------------------------
+    # Install LXC
+    # ------------------------
+    - name: Install LXC and tools
+      apt:
+        name:
+          - lxc
+          - lxc-templates
+          - lxc-utils
+          - uidmap
+          - debootstrap
+        state: present
+        update_cache: yes
+
+    - name: Enable LXC default networking (lxcbr0)
+      lineinfile:
+        path: /etc/default/lxc-net
+        regexp: '^USE_LXC_BRIDGE='
+        line: 'USE_LXC_BRIDGE="true"'
+
+    - name: Enable and start LXC Net
+      service:
+        name: lxc-net
+        state: started
+        enabled: yes
