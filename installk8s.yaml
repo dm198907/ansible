@@ -58,6 +58,13 @@
       register: compose_latest_version
       changed_when: false
 
+    - name: Create directory for Docker CLI plugins
+      file:
+        path: /usr/local/lib/docker/cli-plugins
+        state: directory
+        mode: '0755'
+        recurse: yes
+
     - name: Download latest Docker Compose plugin
       get_url:
         url: "https://github.com/docker/compose/releases/download/{{ compose_latest_version.stdout }}/docker-compose-linux-x86_64"
