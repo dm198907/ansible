@@ -34,7 +34,7 @@
 
     - name: Add Docker apt repository
       apt_repository:
-        repo:"deb https://apt.kubernetes.io/ kubernetes main"
+        repo: "deb https://apt.kubernetes.io/ kubernetes main"
         filename: docker
         state: present
 
