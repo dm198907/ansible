@@ -34,7 +34,7 @@
 
     - name: Add Docker apt repository
       apt_repository:
-        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian {{ ansible_distribution_release | lower }} stable"
+        repo:"deb https://apt.kubernetes.io/ kubernetes main"
         filename: docker
         state: present
 
