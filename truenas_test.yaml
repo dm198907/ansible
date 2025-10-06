@@ -1,17 +1,15 @@
 ---
-- name: Test TrueNAS Scale connection
+- name: Test TrueNAS Scale connection and get facts
   hosts: localhost
   gather_facts: no
   collections:
     - arensb.truenas
 
   tasks:
-    - name: Get TrueNAS system facts
+    - name: Fetch all TrueNAS facts (debug structure)
       truenas_facts:
-        api_url: "http://192.168.1.44/api/v2.0"
-        api_token: "1-LPiCXzfcQkzZrgUkvBw2rqQFH7aBUib9ZNNOsPrWeSonfBPMqFGsdRmMWD2rzvYb"
       register: truenas_info
 
-    - name: Show TrueNAS product name
+    - name: Show all returned facts from TrueNAS
       debug:
-        msg: "TrueNAS product name is {{ truenas_info.system.product }}"
+        var: truenas_info
